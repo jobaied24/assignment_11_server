@@ -34,6 +34,11 @@ async function run() {
     // connect to the Collection
     const itemsCollection = client.db('lostAndFound').collection('lostAndFoundItems');
 
+    app.get('/items',async(req,res)=>{
+      const result = await itemsCollection.find().toArray();
+      res.send(result);
+    })
+    
     app.post('/addItems',async(req,res)=>{
       const data = req.body;
       const result = await itemsCollection.insertOne(data);
