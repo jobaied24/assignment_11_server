@@ -14,7 +14,7 @@ app.use(express.json());
  });
 
  
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.hota77b.mongodb.net/?appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -35,12 +35,25 @@ async function run() {
     const itemsCollection = client.db('lostAndFound').collection('lostAndFoundItems');
 
     app.get('/items',async(req,res)=>{
-      const result = await itemsCollection.find().toArray();
+      
+      const result = await itemsCollection.find()
+      .sort({date:-1})
+      .limit(6)
+      .toArray();
+      res.send(result);
+    });
+
+
+    app.get('/items/:id',async(req,res)=>{
+      const id = req.params.id;
+      const query = {_id : new ObjectId(id)};
+      const result = await itemsCollection.findOne(query);
       res.send(result);
     })
     
     app.post('/addItems',async(req,res)=>{
       const data = req.body;
+      
       const result = await itemsCollection.insertOne(data);
       res.send(result);
     });
