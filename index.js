@@ -33,12 +33,13 @@ async function run() {
 
     // connect to the Collection
     const itemsCollection = client.db('lostAndFound').collection('lostAndFoundItems');
+    const recoveredCollection = client.db('lostAndFound').collection('recovered');
 
     app.get('/items',async(req,res)=>{
       
       const result = await itemsCollection.find()
       .sort({date:-1})
-      .limit(6)
+      // .limit(6)
       .toArray();
       res.send(result);
     });
@@ -51,12 +52,19 @@ async function run() {
       res.send(result);
     })
     
+    
     app.post('/addItems',async(req,res)=>{
       const data = req.body;
       
       const result = await itemsCollection.insertOne(data);
       res.send(result);
     });
+
+    app.post('/recovered',async(req,res)=>{
+      const data = req.body;
+      const result = await recoveredCollection.insertOne(data);
+      res.send(result);
+    })
   
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
