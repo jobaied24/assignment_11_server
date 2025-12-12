@@ -53,17 +53,37 @@ async function run() {
     })
     
     
+    // post items
     app.post('/addItems',async(req,res)=>{
       const data = req.body;
-      
+       data.status = "active"
       const result = await itemsCollection.insertOne(data);
       res.send(result);
     });
 
+
+    // post recovered item
     app.post('/recovered',async(req,res)=>{
-      const data = req.body;
+      const data = req.body; 
+
       const result = await recoveredCollection.insertOne(data);
-      res.send(result);
+      
+      const updateDoc = {
+        $set:{
+          status:"recovered"
+        }
+      };
+
+            const id = data.itemId;
+      const filter = ({_id:new ObjectId(id)});
+
+      const updateStatus=await itemsCollection.updateOne(filter,updateDoc);
+
+        res.send({
+          result,
+          updateStatus
+        }
+        );
     })
   
     // Send a ping to confirm a successful connection
