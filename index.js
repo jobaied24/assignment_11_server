@@ -35,14 +35,28 @@ async function run() {
     const itemsCollection = client.db('lostAndFound').collection('lostAndFoundItems');
     const recoveredCollection = client.db('lostAndFound').collection('recovered');
 
+      // getting all items
     app.get('/items',async(req,res)=>{
       
-      const result = await itemsCollection.find()
+      const email = req.query.email;
+      const query = {};
+      // console.log(email);
+      if(email){
+        query.email =email;
+      }
+      
+      const result = await itemsCollection.find(query)
       .sort({date:-1})
       // .limit(6)
       .toArray();
       res.send(result);
     });
+
+
+    // logged-in user's items
+    app.get('/myItems',async(req,res)=>{
+      const query = req.body
+    })
 
 
     app.get('/items/:id',async(req,res)=>{
@@ -74,18 +88,33 @@ async function run() {
         }
       };
 
-            const id = data.itemId;
+      const id = data.itemId;
       const filter = ({_id:new ObjectId(id)});
 
       const updateStatus=await itemsCollection.updateOne(filter,updateDoc);
-
         res.send({
           result,
           updateStatus
         }
         );
-    })
+    });
+
+    
+
+        // update item
+        app.put('/updateItem/:id',async(req,res)=>{
+          const id = req.params.id;
+          const filter = ({_id : new ObjectId(id)});
+          const updateItem = req.body;
+          console.log(updateItem)
+          const updateDoc = {
+            $set:updateItem
+          };
+          const result = await itemsCollection.updateOne(filter,updateDoc);
+          res.send(result);
+        })
   
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
