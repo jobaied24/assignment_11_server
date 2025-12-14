@@ -65,6 +65,17 @@ async function run() {
       const result = await itemsCollection.findOne(query);
       res.send(result);
     })
+
+
+    // recovered item
+    app.get('/allRecovered',async(req,res)=>{
+      const email = req.query.email;
+      const query = {
+        email: email
+      }
+      const result = await recoveredCollection.find(query).toArray();
+      res.send(result);
+    })
     
     
     // post items
