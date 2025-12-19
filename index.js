@@ -85,9 +85,20 @@ async function run() {
     app.get('/items',async(req,res)=>{
       
       const email = req.query.email;
+      const title = req.query.title;
+      const location = req.query.location;
+
       const limit = parseInt(req.query.limit);
       const query = {};
       // console.log(email);
+      if(title){
+        query.title =title;
+      }   
+
+      if(location){
+        query.location = location;
+      }
+
       if(email){
         query.email =email;
       }
@@ -113,7 +124,6 @@ async function run() {
       const id = req.params.id;
  
       const query = {_id : new ObjectId(id)};
-
  
       const result = await itemsCollection.findOne(query);
       res.send(result);
