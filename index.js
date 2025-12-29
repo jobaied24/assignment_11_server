@@ -9,7 +9,9 @@ const port = process.env.PORT || 3000;
 
 // midleware
 app.use(cors({
-  origin:['http://localhost:5173'],
+  origin:['http://localhost:5173',
+'https://assignment-11-auth-56502.web.app' 
+  ],
   credentials:true
 }));
 
@@ -64,6 +66,20 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.hota77b.mongodb.net/?appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
+
+// let client;
+// let clientPromise;
+
+// if (!global._mongoClientPromise) {
+//   client = new MongoClient(uri, {
+//     serverApi: { version: ServerApiVersion.v1, strict: true, deprecationErrors: true },
+//   });
+//   global._mongoClientPromise = client.connect();
+// }
+
+// clientPromise = global._mongoClientPromise;
+
+
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -75,8 +91,8 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
-
+    // await client.connect();
+   
     // connect to the Collection
     const itemsCollection = client.db('lostAndFound').collection('lostAndFoundItems');
     const recoveredCollection = client.db('lostAndFound').collection('recovered');
@@ -177,12 +193,13 @@ app.post('/jwt',async(req,res)=>{
   const {email} = req.body;
   const userData = {email};
   console.log(userData);
-  const token = jwt.sign(userData,process.env.JWT_SECRET,{expiresIn:'1h'});
+  const token =await jwt.sign(userData,process.env.JWT_SECRET,{expiresIn:'1h'});
   
   // token set to the cookie
   res.cookie('token',token,{
     httpOnly:true,
-    secure:false
+      secure: true,
+  sameSite: 'none'
   })
 
   res.send({token});
@@ -213,7 +230,6 @@ app.post('/jwt',async(req,res)=>{
     });
 
     
-
         // update item
         app.put('/updateItem/:id',verifyToken,async(req,res)=>{
           const id = req.params.id;
@@ -233,22 +249,26 @@ app.post('/jwt',async(req,res)=>{
         app.delete('/deleteItem/:id',verifyToken,async(req,res)=>{
           const id = req.params.id;
           const query =({_id: new ObjectId(id)});
-
+          
           const result = await itemsCollection.deleteOne(query);
           res.send(result);
         })
   
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    // await client.db("admin").command({ ping: 1 });
+    // console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
   }
 }
 run().catch(console.dir);
+module.exports = app;
 
- app.listen(port,()=>{
-    console.log('surver is running on port', port)
- });
+//  app.listen(port,()=>{
+//     console.log('surver is running on port', port)
+//  });
+
+
+
